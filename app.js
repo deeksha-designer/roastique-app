@@ -13,7 +13,8 @@ const paths = {
  plus:'<path d="M12 5v14M5 12h14"/>',close:'<path d="m6 6 12 12M18 6 6 18"/>',
  mic:'<rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2m-7 9v3m-4 0h8"/>'
 };
-const icon = name => '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+paths[name]+'</svg>';
+const faIcons={bean:'fa-seedling',home:'fa-house',cup:'fa-mug-hot',clock:'fa-clock',book:'fa-passport',star:'fa-star',spark:'fa-wand-magic-sparkles',pin:'fa-location-dot',bag:'fa-bag-shopping',car:'fa-car-side',previous:'fa-chevron-left',next:'fa-chevron-right',plus:'fa-plus',close:'fa-xmark',mic:'fa-microphone'};
+const icon = name => '<i class="icon fa-solid '+faIcons[name]+'" aria-hidden="true"></i>';
 function firstName(){return state.profileName.split(/\s+/)[0];}
 function profileInitial(){return Array.from(firstName())[0].toLocaleUpperCase();}
 const $ = selector => document.querySelector(selector);
@@ -54,7 +55,7 @@ const fresh = {cart:[], profileName:'Arjun', mobile:'', email:'', vehicle:{plate
 ]};
 let state;
 try {state={...structuredClone(fresh),...JSON.parse(localStorage.getItem('roastique-preview-v1')||'{}')};} catch {state=structuredClone(fresh);}
-let category='All', activeBean=0, mapOpen=false, trivia=null, alertTimer, checkoutMode=false, listening=false;
+let category='All', activeBean=0, mapOpen=false, trivia=null, alertTimer, carouselTimer, checkoutMode=false, listening=false;
 let picks=['flat','croissant'];
 const messages=[{role:'assistant',get text(){return 'How are you feeling, '+firstName()+'? Tell me what you’re in the mood for and I’ll suggest something from the menu.';}}];
 const money = amount => '₹'+amount.toLocaleString('en-IN');
@@ -163,10 +164,10 @@ function carouselControls(trackId,label){
 }
 function homeDiscover(){
  return '<section class="home-menu" aria-labelledby="home-menu-title"><div class="section-head"><h2 id="home-menu-title">Explore the menu</h2></div>'+
- '<div class="category-grid" aria-label="Menu categories">'+
+ '<div class="category-grid" id="home-category-track" aria-label="Menu categories">'+
  [['Espresso','flat'],['Filter','filter'],['Cold','cold'],['Kitchen','toast'],['Bakery','croissant']].map(([label,id])=>
  '<button class="category-card" data-action="browse-category" data-value="'+label+'"><img src="assets/'+id+'.jpg" alt="" loading="lazy"><span>'+label+'</span></button>').join('')+
- '</div></section><div class="home-discover">'+
+ '</div>'+carouselControls('home-category-track','menu category')+'</section><div class="home-discover">'+
  '<section class="panel" aria-labelledby="home-mood-title"><h2 id="home-mood-title">What are you in the mood for?</h2><div class="chips" aria-label="Choose a mood">'+homeMoods.map(([name],i)=>
  '<button class="chip" aria-pressed="'+(homeMood===i)+'" data-action="home-mood" data-value="'+i+'">'+name+'</button>').join('')+
  '</div><div id="home-mood-picks" aria-live="polite">'+homeMoodPicks()+'</div></section>'+
@@ -176,7 +177,7 @@ function homeDiscover(){
 }
 function home(){
  const date=new Intl.DateTimeFormat('en-IN',{weekday:'long',day:'numeric',month:'long',timeZone:'Asia/Kolkata'}).format(new Date());
- return '<div class="home-greeting"><div><p>'+date+'</p><h1>Good coffee, '+escaped(firstName())+'.</h1></div><a href="#profile" class="avatar home-avatar" aria-label="Open profile">'+escaped(profileInitial())+'</a></div>'+
+ return '<div class="home-greeting"><div><p>'+date+'</p><h1>Good coffee, '+escaped(firstName())+'.</h1></div><a href="#profile" class="home-avatar" aria-label="Open profile"><img class="avatar-photo" src="assets/profile.png" alt="Arjun"></a></div>'+
  '<section class="status-pair" aria-label="Your Roastique status"><a href="#roasties"><span>Roasties</span><strong>'+number(state.points)+'</strong><small>Rewards balance</small></a><a href="#queue"><span>Café status</span><strong>'+(state.queue?'#'+state.queue.position:'9')+'</strong><small>'+(state.queue?'Your queue spot':'Seats available')+'</small></a></section>'+
  '<section class="hero"><div class="hero-copy"><span>Today at Roastique</span><h2>First, coffee.<br>Then, whatever.</h2><p>Slow brews, warm bakes and your table waiting.</p><div class="buttons">'+link('Explore menu','order','white')+link('Find my coffee','ai','ghost')+'</div></div></section>'+
  '<section aria-labelledby="featured-title"><div class="section-head"><h2 id="featured-title">Made for today</h2><a href="#order">See all</a></div><div class="featured-track" id="featured-track" tabindex="0" aria-label="Featured menu items">'+['filter','croissant','cold','flat','toast','cappuccino'].map(id=>productCard(item(id),true)).join('')+'</div>'+carouselControls('featured-track','featured item')+'</section>'+visitCard()+
@@ -186,7 +187,7 @@ function home(){
 function order(){
  return heading('Order','Golf Course Road · Ready in 8–12 min')+
  '<div class="chips" aria-label="Order type">'+['Pickup','Dine in'].map(mode=>'<button class="chip" aria-pressed="'+(state.mode===mode)+'" data-action="mode" data-value="'+mode+'">'+mode+'</button>').join('')+'</div>'+
- '<div class="chips" aria-label="Menu categories">'+['All','Espresso','Filter','Cold','Kitchen','Bakery'].map(name=>'<button class="chip" aria-pressed="'+(category===name)+'" data-action="category" data-value="'+name+'">'+name+'</button>').join('')+'</div>'+
+ '<div class="tab-row"><div class="chips" id="order-category-tabs" aria-label="Menu categories">'+['All','Espresso','Filter','Cold','Kitchen','Bakery'].map(name=>'<button class="chip" aria-pressed="'+(category===name)+'" data-action="category" data-value="'+name+'">'+name+'</button>').join('')+'</div>'+carouselControls('order-category-tabs','menu category')+'</div>'+
  '<div class="grid">'+products.filter(p=>category==='All'||p.category===category).map(p=>productCard(p)).join('')+'</div>'+
  (count()?'<div class="total"><span>'+count()+' items · '+money(total())+'</span>'+button('View order','bag')+'</div>':'');
 }
@@ -228,7 +229,7 @@ function ai(){
 }
 function profile(){
  return heading('Your profile','Make Roastique yours.')+
- '<div class="split"><section class="panel"><div class="profile-identity"><span class="avatar" aria-hidden="true">'+escaped(profileInitial())+'</span><div><h2>'+escaped(state.profileName)+'</h2><p class="muted">Roastique member</p></div></div>'+
+ '<div class="split"><section class="panel"><div class="profile-identity"><img class="avatar avatar-photo" src="assets/profile.png" alt="Arjun"><div><h2>'+escaped(state.profileName)+'</h2><p class="muted">Roastique member</p></div></div>'+
  `<form class="profile-form" data-form="profile">
  <p class="subtle profile-note">Only your display name is required. Profile details stay in this browser.</p>
  <fieldset class="profile-section">
@@ -255,20 +256,22 @@ function profile(){
 const pages={home,order,queue,passport,roasties,ai,valet,cart,profile};
 let route='home';
 function render(focus=false){
+ clearInterval(carouselTimer);
  route=location.hash.slice(1)||'home';
  if(!Object.hasOwn(pages,route)) route='home';
  $('#navigation').innerHTML=nav.map(([id,label,symbol])=>'<a class="nav-link" href="#'+id+'"'+(route===id?' aria-current="page"':'')+'>'+icon(symbol)+label+'</a>').join('');
  const profileLink=$('.avatar-link');
- profileLink.querySelector('.avatar').textContent=profileInitial();
  if(route==='profile')profileLink.setAttribute('aria-current','page');
  else profileLink.removeAttribute('aria-current');
+ $('#back-button').hidden=route==='home';
+ $('.mobile-brand').hidden=route!=='home';
  main.classList.remove('page-ready');
  main.dataset.route=route;
  main.innerHTML=pages[route]();
  requestAnimationFrame(()=>main.classList.add('page-ready'));
  updateBag();
  if(route==='home')checkSavedLocationPermission();
- document.querySelectorAll('.featured-track').forEach(track=>{
+ document.querySelectorAll('.featured-track,.category-grid,#order-category-tabs').forEach(track=>{
   const controls=document.querySelectorAll('[data-action="carousel-scroll"][aria-controls="'+track.id+'"]');
   const [previous,next]=controls;
   const sync=()=>{
@@ -278,11 +281,21 @@ function render(focus=false){
   track.addEventListener('scroll',sync,{passive:true});
   sync();
  });
+ if(route==='home'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+  const track=$('#featured-track');
+  carouselTimer=setInterval(()=>{
+   if(!track||document.hidden)return;
+   const stride=track.firstElementChild.offsetWidth+parseFloat(getComputedStyle(track).columnGap||0);
+   const end=track.scrollLeft+track.clientWidth>=track.scrollWidth-4;
+   track.scrollTo({left:end?0:track.scrollLeft+stride,behavior:'smooth'});
+  },3400);
+ }
  if(focus){window.scrollTo(0,0);main.focus({preventScroll:true});}
 }
 function dialog(title,body){
  modal.innerHTML='<div class="dialog-head"><h2 id="dialog-title">'+title+'</h2><button class="icon-button" data-action="close" aria-label="Close dialog">'+icon('close')+'</button></div>'+body;
- if(!modal.open)modal.showModal();
+ $('.shell').classList.add('modal-open');
+ if(!modal.open)modal.show();
 }
 function addLine(id,options=''){
  const existing=state.cart.find(line=>line.id===id&&line.options===options);
@@ -306,7 +319,7 @@ function cart(){
    '<section class="cart-favourites" aria-labelledby="cart-favourites-title"><div class="section-head"><h2 id="cart-favourites-title">Roastique favourites</h2>'+link('Browse menu','order','ghost')+'</div>'+
    '<div class="grid">'+['flat','cookie'].map(id=>productCard(item(id),true)).join('')+'</div></section>';
  }
- return title+'<section class="panel cart-panel">'+state.cart.map((line,i)=>'<div class="row"><div><strong>'+line.qty+' × '+item(line.id).name+'</strong><span class="muted">'+escaped(line.options)+'</span></div><button class="icon-button" data-action="decrease" data-value="'+i+'" aria-label="Remove one '+item(line.id).name+'">−</button><button class="icon-button" data-action="increase" data-value="'+i+'" aria-label="Add one '+item(line.id).name+'">+</button></div>').join('')+'<div class="total"><span>Total</span>'+money(total())+'</div>'+button('Review demo order','checkout','wide')+'</section>';
+ return title+'<section class="panel cart-panel"><div class="cart-lines">'+state.cart.map((line,i)=>{const p=item(line.id);return '<div class="cart-line">'+image(p)+'<div class="cart-line-copy"><strong>'+p.name+'</strong><span>'+escaped(line.options||p.detail)+'</span><b>'+money(p.price*line.qty)+'</b></div><div class="quantity-stepper" aria-label="Quantity for '+p.name+'"><button data-action="decrease" data-value="'+i+'" aria-label="Decrease '+p.name+'">−</button><span>'+line.qty+'</span><button data-action="increase" data-value="'+i+'" aria-label="Increase '+p.name+'">+</button></div></div>';}).join('')+'</div><div class="order-summary"><h3>Order summary</h3><div><span>Subtotal</span><strong>'+money(total())+'</strong></div><div><span>Packaging</span><strong>₹0</strong></div><div class="summary-total"><span>Total</span><strong>'+money(total())+'</strong></div></div>'+button('Review order · '+money(total()),'checkout','wide')+'</section>';
 }
 function bag(){
  checkoutMode=false;
@@ -316,7 +329,7 @@ function bag(){
 function checkout(){
  if(!count())return;
  checkoutMode=true;
- dialog('Review order','<p>'+state.mode+' at Golf Course Road.</p><div class="total"><span>'+count()+' items</span>'+money(total())+'</div><p class="subtle">This preview simulates order placement. No payment is collected.</p><div class="buttons">'+button('Back to cart','bag','ghost')+button('Place demo order','place')+'</div>');
+ dialog('Review order','<p>'+state.mode+' at Golf Course Road.</p><div class="total"><span>'+count()+' items</span>'+money(total())+'</div><p class="subtle">This preview simulates order placement. No payment is collected.</p><div class="buttons">'+button('Place demo order · '+money(total()),'place','wide')+'</div>');
 }
 function place(){
  if(!checkoutMode||!count())return;
@@ -404,7 +417,7 @@ function showLaunch(){
  launchTimer=setTimeout(dismissLaunch,matchMedia('(prefers-reduced-motion: reduce)').matches?850:2350);
 }
 const actions={
- close:()=>modal.close(), bag, checkout, place,
+ close:()=>modal.close(), back:()=>{location.hash='home';}, bag, checkout, place,
  'dismiss-launch':dismissLaunch,
  reset:()=>dialog('Reset preview?','<p>Reset your demo bag, queue, Roasties and valet progress.</p><div class="buttons">'+button('Cancel','close','ghost')+button('Reset preview','confirm-reset')+'</div>'),
  'confirm-reset':()=>{state=structuredClone(fresh);trivia=null;category='All';mapOpen=false;activeBean=0;homeMood=0;homeOrigin=1;picks=['flat','croissant'];messages.splice(1);modal.close();save();render();notice('Preview reset.');},
@@ -483,5 +496,6 @@ document.addEventListener('submit',event=>{
  if(type==='customize'){modal.close();addLine(form.dataset.id,[...values.values()].join(' · '));}
 });
 window.addEventListener('hashchange',()=>{if(location.hash!=='#content'){if(modal.open)modal.close();render(true);}});
+modal.addEventListener('close',()=>$('.shell').classList.remove('modal-open'));
 document.querySelectorAll('[data-icon]').forEach(node=>{node.innerHTML=icon(node.dataset.icon);});
 render();

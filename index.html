@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer">
 <link rel="stylesheet" href="styles.css">
 <script src="app.js" defer></script>
 </head>
@@ -36,15 +37,15 @@
 <div class="rail-foot"><span data-icon="pin"></span><div>Golf Course Road<small>Phase 1, Gurugram</small></div></div>
 </aside>
 <div class="workspace">
-<header class="topbar"><a href="#home" class="mobile-brand" aria-label="Roastique home"><span class="brand-icon"><img class="logo-glyph" src="assets/roastique-mark.png" alt="" width="88" height="192"></span><span>Roastique</span></a><span class="location"><span data-icon="pin"></span> Golf Course Road, Gurugram</span><div class="top-actions"><button class="icon-button bag" data-action="bag" aria-label="Open order bag"><span data-icon="bag"></span><b id="bag-count" hidden></b></button><a class="avatar-link" href="#profile" aria-label="Open profile"><span class="avatar" aria-hidden="true">A</span></a></div></header>
+<header class="topbar"><button class="icon-button back-button" id="back-button" data-action="back" aria-label="Back" hidden><span data-icon="previous"></span></button><a href="#home" class="mobile-brand" aria-label="Roastique home"><span class="brand-icon"><img class="logo-glyph" src="assets/roastique-mark.png" alt="" width="88" height="192"></span><span>Roastique</span></a><span class="location"><span data-icon="pin"></span> Golf Course Road, Gurugram</span><div class="top-actions"><button class="icon-button bag" data-action="bag" aria-label="Open order bag"><span data-icon="bag"></span><b id="bag-count" hidden></b></button><a class="avatar-link" href="#profile" aria-label="Open profile"><img class="avatar avatar-photo" src="assets/profile.png" alt="Arjun"></a></div></header>
 <main id="content" tabindex="-1"></main>
 <footer><span>Roastique café · Client preview</span><button class="text-button" data-action="reset">Reset preview</button></footer>
-</div>
 </div>
 <div class="cart-dock" id="cart-dock" hidden>
 <button class="cart-dock-button" type="button" data-action="bag"><span data-icon="bag"></span><span><strong>View cart</strong><small id="cart-dock-count"></small></span><strong id="cart-dock-total"></strong><span data-icon="next"></span></button>
 </div>
 <dialog id="modal" aria-labelledby="dialog-title"></dialog>
 <div id="notice" role="status" aria-live="polite"></div>
+</div>
 </body>
 </html>
