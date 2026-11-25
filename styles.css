@@ -51,5 +51,16 @@ fieldset{min-width:0;margin:0 0 20px;padding:0;border:0}.profile-section{margin-
 .category-grid{display:flex;padding-bottom:4px}
 .tab-row{width:100%;max-width:100%;overflow:hidden}.tab-row>.chips{width:100%;max-width:100%;margin-left:0;margin-right:0;padding-left:0;padding-right:0}
 .carousel-controls{padding-right:0}
+
+/* One proportional iPhone preview frame at every viewport size. */
+body{display:grid;place-items:center;min-height:100dvh;overflow:hidden}
+.shell{width:min(430px,calc(100vw - 24px),calc((100dvh - 24px) * .483146));height:auto;aspect-ratio:430 / 890;margin:0;flex:none;border:9px solid #272727;border-radius:48px;overflow:hidden}
+.shell::before{display:block}
+.workspace{width:100%;height:100%;min-width:0}
+@media(max-width:700px){
+ body{display:grid;place-items:center;min-height:100dvh;overflow:hidden;background:#e9e7e3}
+ .shell{width:min(430px,calc(100vw - 24px),calc((100dvh - 24px) * .483146));height:auto;aspect-ratio:430 / 890;margin:0;border:9px solid #272727;border-radius:48px;box-shadow:0 10px 28px rgba(30,24,24,.07)}
+ .shell::before{display:block}
+}
 .cart-dock{left:12px;right:12px}.cart-dock-button{box-shadow:0 6px 18px rgba(49,34,36,.14)}
 @media(max-width:370px){.hero-copy{width:72%;padding:15px}.hero-copy .btn{font-size:11px;padding-inline:9px}.quantity-stepper{grid-template-columns:28px 22px 28px}.cart-line{grid-template-columns:54px minmax(0,1fr) auto;gap:9px}.cart-line>img{width:54px;height:54px}}
